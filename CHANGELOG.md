@@ -2,101 +2,90 @@
 
 All notable changes to `filament-pdf-viewer` will be documented in this file.
 
-## v2.0.0 - 2025-08-09
+## v3.0.0 - 2025-12-11
 
-### What's Changed
+### 🎉 Major Release - Fork with Enhanced Features
 
-* Bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot[bot] in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/21
-* 2.x upgrade v4 by @jeffersongoncalves in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/24
+This is a fork of `joaopaulolndev/filament-pdf-viewer` with significant enhancements:
 
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.7...v2.0.0
+-   **PDF.js Integration** - Complete integration with Mozilla's PDF.js library for enhanced PDF rendering
+-   **Base64 Support** - Native support for base64 encoded PDF data
+-   **Binary Data Support** - Handle binary PDF streams directly
+-   **Custom Toolbar** - Interactive toolbar with zoom, pagination, and navigation controls
+-   **Dark Mode Support** - Fully compatible with Filament's dark mode
+-   **Configuration System** - New config file for customizing defaults
 
-## v1.0.7 - 2025-02-07
+### ✨ New Features
 
-### What's Changed
+-   Added `usePdfJs()` method to enable/disable PDF.js viewer
+-   Added `showToolbar()` method to control toolbar visibility
+-   Added `defaultScale()` method for zoom control (`auto`, `page-fit`, `page-width`, or numeric)
+-   Added `pdfJsOptions()` method for advanced PDF.js configuration
+-   Added automatic base64 detection with `isBase64Data()` helper
+-   Added `getBinaryAsBase64()` helper for binary conversion
+-   Added CDN fallback for PDF.js library
+-   Added asset publishing support
+-   Added comprehensive configuration file
 
-* Bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/15
-* Fix #12 : fix wrong return type by @CharlieEtienne in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/18
+### 📦 Installation
 
-### New Contributors
+```bash
+composer require swelem/filament-pdf-viewer:^3.0
+```
 
-* @CharlieEtienne made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/18
+### Migration from Original Package (joaopaulolndev/filament-pdf-viewer v2.x)
 
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.6...v1.0.7
+```bash
+# Update composer.json
+composer remove joaopaulolndev/filament-pdf-viewer
+composer require swelem/filament-pdf-viewer:^3.0
 
-## v1.0.6 - 2024-09-26
+# Update use statements in your code
+# From: use Joaopaulolndev\FilamentPdfViewer\...
+# To:   use Swelem\FilamentPdfViewer\...
+```
 
-### What's Changed
+**Full Changelog**: https://github.com/Swelem/filament-pdf-viewer/commits/feat/pdfjs
 
-* Update PdfViewerEntry.php by @kmoconnect in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/9
+### 📚 Documentation
 
-### New Contributors
+-   Added extensive usage examples in README
+-   Added SETUP_PDFJS.md for PDF.js installation guide
+-   Added MIGRATION.md for upgrading from original package
+-   Added EXAMPLES.php with real-world usage scenarios
+-   Added install-pdfjs.sh script for easy PDF.js setup
+-   Added ATTRIBUTION.md for fork relationship transparency
 
-* @kmoconnect made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/9
+### 🔧 Technical Changes
 
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.5...v1.0.6
+-   Enhanced `PdfViewerField` component with PDF.js support
+-   Enhanced `PdfViewerEntry` component with PDF.js support
+-   Updated Blade views with PDF.js rendering engine
+-   Updated ServiceProvider to publish config and assets
+-   Maintained full backward compatibility with iframe viewer
 
-## v1.0.5 - 2024-09-05
+### 🎨 UI Improvements
 
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.4...v1.0.5
+-   Interactive pagination controls
+-   Zoom level selector (auto, page-fit, page-width, percentages)
+-   Responsive canvas rendering
+-   Smooth page transitions
+-   Better error handling and display
+-   Dark mode compatible styling
 
-## v1.0.4 - 2024-09-05
+### 🐛 Bug Fixes
 
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.3...v1.0.4
+-   Improved URL and base64 data detection
+-   Better handling of private file storage
+-   Fixed CORS issues with PDF.js
+-   Enhanced file existence checking
+-   Added CDN fallback for PDF.js library
 
-## v1.0.3 - 2024-09-05
+---
 
-### What's Changed
+## Previous Versions (Original Package)
 
-* Improve file url handler by @a21ns1g4ts in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/8
+For the changelog of the original `joaopaulolndev/filament-pdf-viewer` package, please visit:
+https://github.com/joaopaulolndev/filament-pdf-viewer/blob/2.x/CHANGELOG.md
 
-### New Contributors
-
-* @a21ns1g4ts made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/8
-
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.2...v1.0.3
-
-## v1.0.2 - 2024-07-11
-
-### What's Changed
-
-* Bump dependabot/fetch-metadata from 2.1.0 to 2.2.0 by @dependabot in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/6
-* Allow closure in setting the file url in infolists entry. by @SalehHub in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/5
-
-### New Contributors
-
-* @SalehHub made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/5
-
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.1...v1.0.2
-
-## v1.0.1 - 2024-07-05
-
-### What's Changed
-
-* Update README.md by @jeffersonsimaogoncalves in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/3
-* Allow closure in setting the file url in form field. by @agcodex01 in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/4
-
-### New Contributors
-
-* @jeffersonsimaogoncalves made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/3
-* @agcodex01 made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/4
-
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/compare/v1.0.0...v1.0.1
-
-## v1.0.0 - 2024-06-22
-
-### What's Changed
-
-* Bump dependabot/fetch-metadata from 1.6.0 to 2.1.0 by @dependabot in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/1
-* Develop by @rmsramos in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/2
-
-### New Contributors
-
-* @dependabot made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/1
-* @rmsramos made their first contribution in https://github.com/joaopaulolndev/filament-pdf-viewer/pull/2
-
-**Full Changelog**: https://github.com/joaopaulolndev/filament-pdf-viewer/commits/v1.0.0
-
-## 1.0.0 - 202X-XX-XX
-
-- initial release
+-   initial release

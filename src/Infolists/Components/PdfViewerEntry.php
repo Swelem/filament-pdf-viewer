@@ -1,6 +1,6 @@
 <?php
 
-namespace Joaopaulolndev\FilamentPdfViewer\Infolists\Components;
+namespace Swelem\FilamentPdfViewer\Infolists\Components;
 
 use Closure;
 use Filament\Infolists\Components\ViewEntry;
@@ -23,6 +23,27 @@ class PdfViewerEntry extends ViewEntry
     protected string|Closure $visibility = 'public';
 
     protected bool|Closure $shouldCheckFileExistence = true;
+
+    protected bool|Closure $usePdfJs = true;
+
+    protected array|Closure $pdfJsOptions = [];
+
+    protected bool|Closure $showToolbar = true;
+
+    protected string|Closure $defaultScale = 'auto';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Set default PDF.js usage from config
+        $this->usePdfJs = config('filament-pdf-viewer.use_pdfjs', true);
+        
+        // Load default viewer options from config
+        $viewerOptions = config('filament-pdf-viewer.viewer_options', []);
+        $this->showToolbar = $viewerOptions['show_toolbar'] ?? true;
+        $this->defaultScale = $viewerOptions['default_scale'] ?? 'auto';
+    }
 
     public function minHeight(string $minHeight): self
     {
@@ -118,5 +139,148 @@ class PdfViewerEntry extends ViewEntry
     public function getRoute(string $file)
     {
         return $this->getFileUrl($file);
+    }
+
+    /**
+     * Enable or disable PDF.js viewer
+     */
+    public function usePdfJs(bool|Closure $condition = true): static
+    {
+        $this->usePdfJs = $condition;
+
+        return $this;
+    }
+
+    /**
+     * Check if PDF.js should be used
+     */
+    public function shouldUsePdfJs(): bool
+    {
+        return (bool) $this->evaluate($this->usePdfJs);
+    }
+
+    /**
+     * Set PDF.js viewer options
+     */
+    public function pdfJsOptions(array|Closure $options): static
+    {
+        $this->pdfJsOptions = $options;
+
+        return $this;
+    }
+
+    /**
+     * Get PDF.js viewer options
+     */
+    public function getPdfJsOptions(): array
+    {
+        $options = $this->evaluate($this->pdfJsOptions);
+        
+        // Merge with config defaults
+        return array_merge(
+            config('filament-pdf-viewer.viewer_options', []),
+            is_array($options) ? $options : []
+        );
+    }
+
+    /**
+     * Show or hide the PDF viewer toolbar
+     */
+    public function showToolbar(bool|Closure $condition = true): static
+    {
+        $this->showToolbar = $condition;
+
+        return $this;
+    }
+
+    /**
+     * Check if toolbar should be shown
+     */
+    public function shouldShowToolbar(): bool
+    {
+        return (bool) $this->evaluate($this->showToolbar);
+    }
+
+    /**
+     * Set the default scale for PDF rendering
+     */
+    public function defaultScale(string|Closure $scale): static
+    {
+        $this->defaultScale = $scale;
+
+        return $this;
+    }
+
+    /**
+     * Get the default scale
+     */
+    public function getDefaultScale(): string
+    {
+        return (string) $this->evaluate($this->defaultScale);
+    }
+
+    /**
+     * Convert binary data to base64 data URL
+     */
+    public function getBinaryAsBase64(string $binaryData): string
+    {
+        return 'data:application/pdf;base64,' . base64_encode($binaryData);
+    }
+
+    /**
+     * Check if the data is base64 encoded
+     */
+    public function isBase64Data(?string $data): bool
+    {
+        if (empty($data)) {
+            return false;
+        }
+
+        return str($data)->startsWith('data:application/pdf;base64,')
+            || str($data)->startsWith('data:');
+    }
+
+    /**
+     * Get PDF.js library URL
+     */
+    public function getPdfJsLibraryUrl(): string
+    {
+        $localPath = public_path('vendor/filament-pdf-viewer/pdf.min.mjs');
+        
+        if (file_exists($localPath)) {
+            return asset('vendor/filament-pdf-viewer/pdf.min.mjs');
+        }
+
+        // Fallback to CDN
+        if (config('filament-pdf-viewer.use_cdn_fallback', true)) {
+            $version = config('filament-pdf-viewer.pdfjs_version', '4.0.379');
+            $cdnUrl = config('filament-pdf-viewer.cdn_url', 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/{version}');
+            
+            return str_replace('{version}', $version, $cdnUrl) . '/pdf.min.mjs';
+        }
+
+        return '';
+    }
+
+    /**
+     * Get PDF.js worker URL
+     */
+    public function getPdfJsWorkerUrl(): string
+    {
+        $localPath = public_path('vendor/filament-pdf-viewer/pdf.worker.min.mjs');
+        
+        if (file_exists($localPath)) {
+            return asset('vendor/filament-pdf-viewer/pdf.worker.min.mjs');
+        }
+
+        // Fallback to CDN
+        if (config('filament-pdf-viewer.use_cdn_fallback', true)) {
+            $version = config('filament-pdf-viewer.pdfjs_version', '4.0.379');
+            $cdnUrl = config('filament-pdf-viewer.cdn_url', 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/{version}');
+            
+            return str_replace('{version}', $version, $cdnUrl) . '/pdf.worker.min.mjs';
+        }
+
+        return '';
     }
 }

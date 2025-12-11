@@ -1,22 +1,34 @@
 {
-    "name": "joaopaulolndev/filament-pdf-viewer",
-    "description": "Filament package to show pdf document viewer",
+    "name": "swelem/filament-pdf-viewer",
+    "description": "Enhanced fork of Filament PDF Viewer with PDF.js integration and base64 support (originally by joaopaulolndev)",
     "keywords": [
-        "joaopaulolndev",
+        "swelem",
         "laravel",
-        "filament-pdf-viewer"
+        "filament-pdf-viewer",
+        "pdf.js",
+        "pdf-viewer",
+        "base64-pdf",
+        "filament",
+        "filament-component",
+        "fork",
+        "joaopaulolndev"
     ],
-    "homepage": "https://github.com/joaopaulolndev/filament-pdf-viewer",
+    "homepage": "https://github.com/Swelem/filament-pdf-viewer",
     "support": {
-        "issues": "https://github.com/joaopaulolndev/filament-pdf-viewer/issues",
-        "source": "https://github.com/joaopaulolndev/filament-pdf-viewer"
+        "issues": "https://github.com/Swelem/filament-pdf-viewer/issues",
+        "source": "https://github.com/Swelem/filament-pdf-viewer"
     },
     "license": "MIT",
+    "readme": "README.md",
     "authors": [
+        {
+            "name": "Saif Swelem",
+            "role": "Developer"
+        },
         {
             "name": "João Paulo Leite Nascimento",
             "email": "joaopauloln7@gmail.com",
-            "role": "Developer"
+            "role": "Developer & Original Author"
         }
     ],
     "require": {
@@ -34,12 +46,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Joaopaulolndev\\FilamentPdfViewer\\": "src/"
+            "Swelem\\FilamentPdfViewer\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Joaopaulolndev\\FilamentPdfViewer\\Tests\\": "tests/"
+            "Swelem\\FilamentPdfViewer\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -58,7 +70,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Joaopaulolndev\\FilamentPdfViewer\\FilamentPdfViewerServiceProvider"
+                "Swelem\\FilamentPdfViewer\\FilamentPdfViewerServiceProvider"
             ]
         }
     },
