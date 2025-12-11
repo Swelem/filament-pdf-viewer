@@ -4,7 +4,9 @@
     $hasInlineLabel = $hasInlineLabel();
     $statePath = $getStatePath();
     $state = $getState();
-    $fileUrl = !empty($state) ? $getRoute(current($state)) : $getFileUrl();
+    $fileUrl = !empty($state) 
+        ? (is_array($state) ? $getRoute(current($state)) : $getRoute($state))
+        : $getFileUrl();
     $usePdfJs = $shouldUsePdfJs();
     $componentId = 'pdf-viewer-' . md5($statePath . time());
 @endphp
@@ -33,11 +35,33 @@
             @if(!empty($fileUrl))
                 @if($usePdfJs)
                     {{-- PDF.js Viewer --}}
+                    @php
+                        $pdfJsUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs';
+                        $pdfJsWorker = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs';
+                        $alpineData = "{ loading: true, error: null, status: 'Initializing...', async loadPdf() { try { this.status = 'Finding canvas...'; const canvas = this.\$el.querySelector('.pdf-canvas'); if (!canvas) throw new Error('Canvas not found'); this.status = 'Loading PDF.js...'; const m = await import('{$pdfJsUrl}'); const lib = m.default || m; lib.GlobalWorkerOptions.workerSrc = '{$pdfJsWorker}'; this.status = 'Processing data...'; const data = " . json_encode($fileUrl) . ";";
+                        
+                        if($isBase64Data($fileUrl)) {
+                            $alpineData .= " const b64 = data.split(',')[1]; const bin = atob(b64); const arr = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i); const pdf = await lib.getDocument({ data: arr }).promise;";
+                        } else {
+                            $alpineData .= " const pdf = await lib.getDocument({ url: data }).promise;";
+                        }
+                        
+                        $alpineData .= " this.status = 'Rendering page...'; const page = await pdf.getPage(1); const vp = page.getViewport({ scale: 1.5 }); canvas.height = vp.height; canvas.width = vp.width; await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise; const cnt = this.\$el.querySelector('.pdf-page-count'); if (cnt) cnt.textContent = pdf.numPages; this.loading = false; this.status = 'Complete!'; } catch (e) { this.error = e.message; this.loading = false; this.status = 'Failed'; } } }";
+                    @endphp
                     <div 
                         id="{{ $componentId }}" 
                         class="pdf-viewer-container w-full border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
                         style="min-height: {{ $getMinHeight() }};"
+                        x-data="{{ $alpineData }}"
+                        x-init="setTimeout(() => loadPdf(), 500)"
                     >
+                        <div x-show="loading" class="p-4 bg-blue-100 text-blue-800 font-bold">
+                            <span x-text="status"></span>
+                        </div>
+                        <div x-show="error" class="p-4 bg-red-100 text-red-800 font-bold">
+                            Error: <span x-text="error"></span>
+                        </div>
+                        
                         @if($shouldShowToolbar())
                         <div class="pdf-toolbar bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 p-2 flex items-center gap-2">
                             <button 
@@ -75,122 +99,6 @@
                             <canvas class="pdf-canvas mx-auto block"></canvas>
                         </div>
                     </div>
-
-                    <script type="module">
-                        import * as pdfjsLib from '{{ $getPdfJsLibraryUrl() }}';
-                        
-                        // Set worker
-                        pdfjsLib.GlobalWorkerOptions.workerSrc = '{{ $getPdfJsWorkerUrl() }}';
-
-                        (function() {
-                            const container = document.getElementById('{{ $componentId }}');
-                            const canvas = container.querySelector('.pdf-canvas');
-                            const ctx = canvas.getContext('2d');
-                            const pageNumDisplay = container.querySelector('.pdf-page-num');
-                            const pageCountDisplay = container.querySelector('.pdf-page-count');
-                            const prevBtn = container.querySelector('.pdf-prev');
-                            const nextBtn = container.querySelector('.pdf-next');
-                            const scaleSelect = container.querySelector('.pdf-scale');
-                            
-                            let pdfDoc = null;
-                            let pageNum = 1;
-                            let pageRendering = false;
-                            let pageNumPending = null;
-                            let currentScale = '{{ $getDefaultScale() }}';
-
-                            // Load PDF
-                            const loadingTask = pdfjsLib.getDocument({
-                                url: '{{ $fileUrl }}',
-                                @if($isBase64Data($fileUrl))
-                                isEvalSupported: false,
-                                @endif
-                            });
-
-                            loadingTask.promise.then(function(pdf) {
-                                pdfDoc = pdf;
-                                pageCountDisplay.textContent = pdf.numPages;
-                                renderPage(pageNum);
-                            }).catch(function(error) {
-                                console.error('Error loading PDF:', error);
-                                container.innerHTML = '<div class="p-4 text-red-600 dark:text-red-400">Error loading PDF: ' + error.message + '</div>';
-                            });
-
-                            function renderPage(num) {
-                                pageRendering = true;
-                                pdfDoc.getPage(num).then(function(page) {
-                                    let scale = parseFloat(currentScale);
-                                    const containerWidth = container.querySelector('.pdf-canvas-container').clientWidth;
-                                    const viewport = page.getViewport({ scale: 1 });
-
-                                    // Calculate scale based on mode
-                                    if (currentScale === 'auto' || currentScale === 'page-width') {
-                                        scale = (containerWidth - 40) / viewport.width;
-                                    } else if (currentScale === 'page-fit') {
-                                        const containerHeight = container.querySelector('.pdf-canvas-container').clientHeight;
-                                        const widthScale = (containerWidth - 40) / viewport.width;
-                                        const heightScale = (containerHeight - 40) / viewport.height;
-                                        scale = Math.min(widthScale, heightScale);
-                                    }
-
-                                    const scaledViewport = page.getViewport({ scale: scale });
-                                    canvas.height = scaledViewport.height;
-                                    canvas.width = scaledViewport.width;
-
-                                    const renderContext = {
-                                        canvasContext: ctx,
-                                        viewport: scaledViewport
-                                    };
-
-                                    const renderTask = page.render(renderContext);
-                                    renderTask.promise.then(function() {
-                                        pageRendering = false;
-                                        if (pageNumPending !== null) {
-                                            renderPage(pageNumPending);
-                                            pageNumPending = null;
-                                        }
-                                    });
-                                });
-
-                                pageNumDisplay.textContent = num;
-                            }
-
-                            function queueRenderPage(num) {
-                                if (pageRendering) {
-                                    pageNumPending = num;
-                                } else {
-                                    renderPage(num);
-                                }
-                            }
-
-                            function onPrevPage() {
-                                if (pageNum <= 1) return;
-                                pageNum--;
-                                queueRenderPage(pageNum);
-                            }
-
-                            function onNextPage() {
-                                if (pageNum >= pdfDoc.numPages) return;
-                                pageNum++;
-                                queueRenderPage(pageNum);
-                            }
-
-                            function onScaleChange() {
-                                currentScale = scaleSelect.value;
-                                queueRenderPage(pageNum);
-                            }
-
-                            @if($shouldShowToolbar())
-                            prevBtn?.addEventListener('click', onPrevPage);
-                            nextBtn?.addEventListener('click', onNextPage);
-                            scaleSelect?.addEventListener('change', onScaleChange);
-                            
-                            // Set default scale
-                            if (scaleSelect) {
-                                scaleSelect.value = currentScale;
-                            }
-                            @endif
-                        })();
-                    </script>
                 @else
                     {{-- Fallback to native iframe viewer --}}
                     <iframe
