@@ -11,7 +11,7 @@
         @if($fileUrl)
             <iframe
                 id="pdf-iframe"
-                src="{{ asset('vendor/filament-pdf-viewer/web/viewer.html') }}?file={{ urlencode($fileUrl) }}"
+                src="{{ asset('vendor/filament-pdf-viewer/pdfjs/web/viewer.html') }}?file={{ urlencode($fileUrl) }}"
                 style="width:100%; height:70vh; border:1px solid #ccc;"
             ></iframe>
         @else

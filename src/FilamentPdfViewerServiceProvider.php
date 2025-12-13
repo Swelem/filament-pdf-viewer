@@ -43,6 +43,5 @@ class FilamentPdfViewerServiceProvider extends PackageServiceProvider
             __DIR__ . '/../resources/dist/pdfjs' => public_path('vendor/filament-pdf-viewer/pdfjs'),
         ], 'filament-pdf-viewer-js');
     }
-        
     }
 }
