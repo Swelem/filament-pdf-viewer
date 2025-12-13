@@ -12,7 +12,7 @@
             <iframe
                 id="pdf-iframe"
                 src="{{ asset('vendor/filament-pdf-viewer/web/viewer.html') }}?file={{ urlencode($fileUrl) }}"
-                style="width:100%; height:600vh; border:1px solid #ccc;"
+                style="width:100%; height:70vh; border:1px solid #ccc;"
             ></iframe>
         @else
             <div>No PDF available</div>
