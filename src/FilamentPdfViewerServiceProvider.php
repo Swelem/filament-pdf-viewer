@@ -38,11 +38,11 @@ class FilamentPdfViewerServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        if ($this->app->runningInConsole()) {
-            // Publish PDF.js assets
+    if ($this->app->runningInConsole()) {
+            // Publish PDF.js files
             $this->publishes([
-                __DIR__ . '/../resources/dist' => public_path('vendor/filament-pdf-viewer'),
-            ], 'filament-pdf-viewer-assets');
+                __DIR__ . '/../resources/dist/pdfjs' => public_path('vendor/filament-pdf-viewer/pdfjs'),
+            ], 'filament-pdf-viewer-js');
 
             // Publish plugin JS
             $this->publishes([
