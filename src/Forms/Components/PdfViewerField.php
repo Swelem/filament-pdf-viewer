@@ -1,6 +1,6 @@
 <?php
 
-namespace Joaopaulolndev\FilamentPdfViewer\Forms\Components;
+namespace Swelem\FilamentPdfViewer\Forms\Components;
 
 use Closure;
 use Filament\Forms\Components\ViewField;
