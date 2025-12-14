@@ -1,62 +1,58 @@
-@props([
-    'label' => 'PDF Viewer',
-    'base64' => '',
-    'minHeight' => '70vh',
-])
+@php
+    // Suppose $base64Pdf comes from your service or default
+    // For now, just get the field's state
+    $base64Pdf = $getState();
+    $uniqueId = uniqid('pdf-');
+@endphp
 
-<div class="filament-field-wrapper">
-    <x-slot name="label">{{ $label }}</x-slot>
+<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+    <x-slot name="label">{{ $getLabel() }}</x-slot>
 
-    <div class="pdf-viewer-container border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden p-2" style="min-height: {{ $minHeight }};" x-data x-init="
-        import('/vendor/filament-pdf-viewer/pdf.js').then(pdfjsLib => {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/filament-pdf-viewer/pdf.worker.js';
-
-            const container = $el;
-            const canvas = document.createElement('canvas');
-            canvas.classList.add('pdf-canvas');
-            container.appendChild(canvas);
-
-            const loadingEl = document.createElement('div');
-            loadingEl.textContent = 'Loading PDF...';
-            loadingEl.className = 'pdf-loading p-2 text-center';
-            container.prepend(loadingEl);
-
-            const errorEl = document.createElement('div');
-            errorEl.style.display = 'none';
-            errorEl.className = 'pdf-error p-2 bg-red-100 text-red-800';
-            container.prepend(errorEl);
-
-            async function renderPdf(base64) {
-                try {
-                    const b64 = base64.split(',')[1];
-                    const bin = atob(b64);
-                    const arr = new Uint8Array(bin.length);
-                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-
-                    const pdfDoc = await pdfjsLib.getDocument({ data: arr }).promise;
-
-                    let currentPage = 1;
-                    let scale = 1.5;
-
-                    const renderPage = async (num) => {
-                        const page = await pdfDoc.getPage(num);
-                        const viewport = page.getViewport({ scale: scale });
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
-                        loadingEl.style.display = 'none';
-                    };
-
-                    renderPage(currentPage);
-                } catch (e) {
-                    console.error(e);
-                    errorEl.style.display = 'block';
-                    errorEl.textContent = e.message;
-                    loadingEl.style.display = 'none';
-                }
-            }
-
-            renderPdf('{{ $base64 }}');
-        });
-    "></div>
-</div>
+    <x-filament::input.wrapper>
+        @if($base64Pdf)
+            <div 
+                x-data="{ 
+                    pdfData: @js($base64Pdf),
+                    iframeId: '{{ $uniqueId }}',
+                    messageSent: false,
+                    init() {
+                        console.log('🟢 Alpine init - PDF length:', this.pdfData?.length);
+                        this.$nextTick(() => {
+                            const iframe = this.$refs.pdfIframe;
+                            console.log('🟢 Alpine: Found iframe:', iframe);
+                            
+                            if (iframe) {
+                                iframe.addEventListener('load', () => {
+                                    console.log('🟢 Alpine: Iframe loaded');
+                                    setTimeout(() => {
+                                        console.log('🟢 Alpine: Sending PDF...');
+                                        iframe.contentWindow.postMessage({ pdfBase64: this.pdfData }, '*');
+                                        this.messageSent = true;
+                                    }, 500);
+                                });
+                            }
+                            
+                            window.addEventListener('message', (event) => {
+                                if (event.data?.iframeReady && !this.messageSent && iframe) {
+                                    console.log('🟢 Alpine: Got ready signal, sending PDF');
+                                    iframe.contentWindow.postMessage({ pdfBase64: this.pdfData }, '*');
+                                    this.messageSent = true;
+                                }
+                            });
+                        });
+                    }
+                }"
+                x-init="init()"
+            >
+                <iframe 
+                    x-ref="pdfIframe"
+                    id="{{ $uniqueId }}"
+                    src="{{ asset('vendor/filament-pdf-viewer/pdfjs/web/viewer-base64.html') }}" 
+                    style="width:100%; height:70vh; border: 1px solid #ccc;">
+                </iframe>
+            </div>
+        @else
+            <div>No PDF available</div>
+        @endif
+    </x-filament::input.wrapper>
+</x-dynamic-component>

@@ -1,21 +1,42 @@
 @php
-    $fileUrl = !empty($getState()) 
-        ? (is_array($getState()) ? url($getRoute(current($getState()))) : url($getRoute($getState())))
-        : url($getFileUrl());
+    use Filament\Support\Facades\FilamentView;
+
+    $hasInlineLabel = $hasInlineLabel();
+    $statePath = $getStatePath();
 @endphp
 
-<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
-    <x-slot name="label">{{ $getLabel() }}</x-slot>
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :field="$field"
+    :has-inline-label="$hasInlineLabel"
+>
+    <x-slot
+        name="label"
+        @class([
+            'sm:pt-1.5' => $hasInlineLabel,
+        ])
+    >
+        {{ $getLabel() }}
+    </x-slot>
 
-    <x-filament::input.wrapper>
-        @if($fileUrl)
-            <iframe
-                id="pdf-iframe"
-                src="{{ asset('vendor/filament-pdf-viewer/pdfjs/web/viewer.html') }}?file={{ urlencode($fileUrl) }}"
-                style="width:100%; height:70vh; border:1px solid #ccc;"
-            ></iframe>
-        @else
-            <div>No PDF available</div>
-        @endif
+    <x-filament::input.wrapper
+        :attributes="
+            \Filament\Support\prepare_inherited_attributes($getExtraAttributeBag())
+                ->class(['fi-fo-textarea fi-sc-flex'])
+        "
+    >
+        <div class="fi-sc-flex">
+            @if(!empty($getState()))
+                <iframe
+                    class="fi-growable"
+                    src="{{ $getRoute(current($getState())) }}" style="min-height: {{ $getMinHeight() }};">
+                </iframe>
+            @elseif(!empty($getFileUrl()))
+                <iframe
+                    class="fi-growable"
+                    src="{{ $getFileUrl() }}" style="min-height: {{ $getMinHeight() }};">
+                </iframe>
+            @endif
+        </div>
     </x-filament::input.wrapper>
 </x-dynamic-component>
