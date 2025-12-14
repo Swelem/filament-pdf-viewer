@@ -124,14 +124,6 @@ See https://github.com/adobe-type-tools/cmap-resources
                 bytes[i] = binary.charCodeAt(i);
             }
             console.log("✓ Converted to", bytes.length, "bytes");
-
-            // Close any existing PDF
-            if (window.PDFViewerApplication?.pdfDocument) {
-                console.log("Closing existing PDF...");
-                await window.PDFViewerApplication.close();
-            }
-
-            // Open the new PDF
             console.log("Opening PDF...");
             await window.PDFViewerApplication.open({ 
                 data: bytes,

@@ -16,31 +16,26 @@
                     iframeId: '{{ $uniqueId }}',
                     messageSent: false,
                     init() {
+                        if (this._initDone) return; // ✅ prevent double-init
+                        this._initDone = true;
+
                         console.log('🟢 Alpine init - PDF length:', this.pdfData?.length);
-                        this.$nextTick(() => {
-                            const iframe = this.$refs.pdfIframe;
-                            console.log('🟢 Alpine: Found iframe:', iframe);
-                            
-                            if (iframe) {
-                                iframe.addEventListener('load', () => {
-                                    console.log('🟢 Alpine: Iframe loaded');
-                                    setTimeout(() => {
-                                        console.log('🟢 Alpine: Sending PDF...');
-                                        iframe.contentWindow.postMessage({ pdfBase64: this.pdfData }, '*');
-                                        this.messageSent = true;
-                                    }, 500);
-                                });
-                            }
-                            
-                            window.addEventListener('message', (event) => {
-                                if (event.data?.iframeReady && !this.messageSent && iframe) {
-                                    console.log('🟢 Alpine: Got ready signal, sending PDF');
+
+                        const iframe = this.$refs.pdfIframe;
+
+                        if (iframe) {
+                            iframe.addEventListener('load', () => {
+                                if (this.messageSent) return; // prevent duplicate send
+                                console.log('🟢 Alpine: Iframe loaded');
+                                setTimeout(() => {
+                                    console.log('🟢 Alpine: Sending PDF...');
                                     iframe.contentWindow.postMessage({ pdfBase64: this.pdfData }, '*');
                                     this.messageSent = true;
-                                }
+                                }, 500);
                             });
-                        });
+                        }
                     }
+
                 }"
                 x-init="init()"
             >
